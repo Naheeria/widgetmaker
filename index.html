@@ -141,7 +141,7 @@
             <label for="notionToken">노션 API 토큰:</label>
             <input type="text" id="notionToken" required placeholder="예: ntn..."> 
             <label for="notionDbId">노션 데이터베이스 ID:</label>
-             <input type="text" id="notionDbId" required placeholder="예: c892b1a2d3f44e567890abcdef">
+            <input type="text" id="notionDbId" required placeholder="예: c892b1a2d3f44e567890abcdef">
 
             <label for="themeSelect">위젯 색상 테마:</label>
             <select id="themeSelect">
@@ -160,14 +160,14 @@
     </div>
 
     <script>
-        // 🚨 Netlify 도메인 주소 적용 완료 🚨
-        const NETLIFY_BASE_URL = 'https://kaleidoscopic-cascaron-149858.netlify.app';
+        // 🚨 Vercel API 도메인 주소 설정
+        // ⚠️ 이 부분을 반드시 고객님의 실제 Vercel 배포 주소로 변경해야 합니다.
+        const VERCEL_BASE_URL = 'YOUR_VERCEL_DOMAIN'; 
 
-        // Netlify 도메인을 사용하여 API 호출 경로를 설정합니다. (GitHub Pages와 Netlify 분리)
-        const SETUP_API_ENDPOINT = `${NETLIFY_BASE_URL}/api/save-settings`; 
-        const WIDGET_API_ENDPOINT_BASE = `${NETLIFY_BASE_URL}/api/get-widget`; 
+        // Vercel 도메인을 사용하여 API 호출 경로를 설정합니다.
+        const SETUP_API_ENDPOINT = `${VERCEL_BASE_URL}/api/save-settings`; 
+        const WIDGET_API_ENDPOINT_BASE = `${VERCEL_BASE_URL}/api/get-widget`; 
 
-        // API 호출 로직이 있는 saveSettings 함수를 복원
         async function saveSettings() {
         // 1. 입력 값 및 UI 요소 가져오기
         const notionToken = document.getElementById('notionToken').value;
@@ -187,7 +187,7 @@
         loadingSpinner.style.display = 'block';
 
         try {
-            // 2. 설정 저장 (Netlify API에 요청)
+            // 2. 설정 저장 (Vercel API에 요청)
             const response = await fetch(SETUP_API_ENDPOINT, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -200,14 +200,14 @@
 
             // HTTP 오류 응답 처리
             if (!response.ok) {
-                // API 호출 실패 시 에러 메시지 처리 (Netlify 환경 변수 문제일 가능성이 높음)
+                // API 호출 실패 시 에러 메시지 처리 (Vercel 환경 변수 문제일 가능성이 높음)
                 let errorMessage = `API 호출 실패: ${response.status}`;
                 try {
                     const errorData = await response.json();
                     errorMessage = `${response.status} - ${errorData.error || '알 수 없는 오류'}`;
                 } catch (e) {
                     // JSON 파싱 실패 시 일반 메시지 사용
-                    errorMessage = `${response.status} - 서버 응답 오류. (Netlify 환경 변수 확인 필요)`;
+                    errorMessage = `${response.status} - 서버 응답 오류. (Vercel 환경 변수 확인 필요)`;
                 }
                 throw new Error(errorMessage);
             }
@@ -215,7 +215,7 @@
             const data = await response.json();
             const userId = data.userId; // Firestore 저장이 성공하면 반환된 고유 ID
 
-            // 3. 위젯 URL 생성 (노션 Embed는 Netlify API 엔드포인트를 사용)
+            // 3. 위젯 URL 생성 (노션 Embed는 Vercel API 엔드포인트를 사용)
             const widgetUrl = `${WIDGET_API_ENDPOINT_BASE}?userId=${userId}`;
 
             // 4. 결과 출력
@@ -236,7 +236,7 @@
         finally {
             loadingSpinner.style.display = 'none'; // 로딩 스피너 숨기기
         }
-    }
+        }
     </script>
 </body>
 </html>

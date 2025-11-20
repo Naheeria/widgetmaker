@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> 나만의 노션 위젯 생성기 (정적 페이지)</title>
+    <title> 나만의 노션 위젯 생성기</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
     
@@ -67,9 +67,10 @@
         input[type="text"]:focus, select:focus {
             border-color: #3f51b5;
         }
+        /* 버튼 색상을 원래 작동 가능한 상태의 파란색으로 복원 */
         button {
             padding: 12px 25px;
-            background-color: #d32f2f; /* 버튼 색상을 오류에 맞춰 빨간색으로 변경 */
+            background-color: #3f51b5; 
             color: white;
             border: none;
             border-radius: 8px;
@@ -80,7 +81,7 @@
             margin-top: 10px;
         }
         button:hover {
-            background-color: #b71c1c;
+            background-color: #303f9f;
             transform: translateY(-2px);
         }
         button:active {
@@ -89,8 +90,8 @@
         #result {
             margin-top: 40px;
             padding: 25px;
-            background-color: #fff8f8; /* 배경색 변경 */
-            border: 1px solid #ffcccb; /* 테두리색 변경 */
+            background-color: #f8faff; /* 배경색을 원래 성공적인 상태로 복원 */
+            border: 1px solid #cfe2ff; /* 테두리색을 원래 성공적인 상태로 복원 */
             border-radius: 10px;
             text-align: left;
             font-size: 0.9em;
@@ -105,7 +106,7 @@
             border-radius: 8px;
             font-family: monospace;
             font-size: 0.9em;
-            background-color: #fce4ec; /* 배경색 변경 */
+            background-color: #eef2f6; /* 배경색을 원래 성공적인 상태로 복원 */
             resize: vertical;
             outline: none;
             white-space: pre;
@@ -124,23 +125,23 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        .error-message { color: #d32f2f; font-weight: 700; margin-top: 10px; }
+        .error-message { color: #d32f2f; font-weight: 500; margin-top: 10px; }
         .success-message { color: #4CAF50; font-weight: 500; margin-top: 10px; }
     </style>
 </head>
 
 <body>
     <div class="container">
-        <h1>⚠️ 노션 위젯 생성기 (백엔드 필요)</h1>
-        <p>이 페이지는 GitHub Pages에 호스팅되어 **API 서버 기능이 없습니다.**</p>
+        <h1>✨ 나만의 노션 위젯 생성기</h1>
+        <p>설정을 저장하고 테마를 선택하여 위젯 URL을 생성하세요.</p>
 
-        <form id="setupForm" onsubmit="event.preventDefault(); showBackendError();"> 
-            <h3>⚙️ 1. 위젯 설정 (기능 정지)</h3>
+        <form id="setupForm" onsubmit="event.preventDefault(); saveSettings();"> 
+            <h3>⚙️ 1. 위젯 설정</h3>
             
             <label for="notionToken">노션 API 토큰:</label>
-            <input type="text" id="notionToken" required placeholder="API 서버가 필요합니다."> 
+            <input type="text" id="notionToken" required placeholder="예: ntn..."> 
             <label for="notionDbId">노션 데이터베이스 ID:</label>
-            <input type="text" id="notionDbId" required placeholder="설정 저장이 불가능합니다.">
+             <input type="text" id="notionDbId" required placeholder="예: c892b1a2d3f44e567890abcdef">
 
             <label for="themeSelect">위젯 색상 테마:</label>
             <select id="themeSelect">
@@ -149,38 +150,93 @@
                 <option value="pink">분홍</option>
             </select>
             
-            <button type="submit">⚠️ 서버 없이 작동 불가</button>
+            <button type="submit">설정 저장 및 위젯 URL 생성</button>
             <div class="spinner" id="loadingSpinner"></div>
         </form>
         
         <div id="result">
-            <p>위젯 설정을 저장하고 URL을 생성하려면 **서버리스 백엔드(예: Netlify Functions, AWS Lambda)가 필요합니다.**</p>
+            <p>생성된 위젯 URL을 복사하여 노션 임베드 블록에 붙여넣으세요.</p>
         </div>
     </div>
 
     <script>
-        // API 엔드포인트를 호출하는 코드를 제거하고, 안내 메시지를 보여주는 함수로 대체했습니다.
-        async function showBackendError() {
-            const resultDiv = document.getElementById('result');
-            const loadingSpinner = document.getElementById('loadingSpinner');
+        // 🚨 Netlify 도메인 주소 적용 완료 🚨
+        const NETLIFY_BASE_URL = 'https://kaleidoscopic-cascaron-149858.netlify.app';
 
-            loadingSpinner.style.display = 'block';
+        // Netlify 도메인을 사용하여 API 호출 경로를 설정합니다. (GitHub Pages와 Netlify 분리)
+        const SETUP_API_ENDPOINT = `${NETLIFY_BASE_URL}/api/save-settings`; 
+        const WIDGET_API_ENDPOINT_BASE = `${NETLIFY_BASE_URL}/api/get-widget`; 
 
-            setTimeout(() => {
-                loadingSpinner.style.display = 'none';
-                resultDiv.innerHTML = `
-                    <p class="error-message">🚨 오류: 설정 저장 서버(API)에 연결할 수 없습니다.</p>
-                    <p style="font-size: 0.9em; color: #333; margin-top: 10px;">
-                        GitHub Pages는 정적 호스팅만 제공합니다.<br>
-                        이 기능을 사용하려면 **별도로 API 백엔드를 배포**해야 합니다.
-                    </p>
-                `;
-            }, 1000); // 1초 지연 후 오류 메시지 표시
-        }
+        // API 호출 로직이 있는 saveSettings 함수를 복원
+        async function saveSettings() {
+        // 1. 입력 값 및 UI 요소 가져오기
+        const notionToken = document.getElementById('notionToken').value;
+        const notionDbId = document.getElementById('notionDbId').value;
+        const theme = document.getElementById('themeSelect').value;
         
-        // saveSettings 함수를 showBackendError로 대체합니다.
-        // 기존의 saveSettings() 함수는 사용되지 않습니다.
-        // form 태그의 onsubmit 이벤트가 showBackendError()를 호출하도록 수정되었습니다.
+        const resultDiv = document.getElementById('result');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+
+        // 입력 필드 검증 (옵션)
+        if (!notionToken || !notionDbId) {
+            resultDiv.innerHTML = '<p class="error-message">토큰과 데이터베이스 ID를 모두 입력해주세요.</p>';
+            return;
+        }
+
+        resultDiv.innerHTML = '<p class="success-message">설정을 저장하고 위젯을 생성하는 중입니다...</p>';
+        loadingSpinner.style.display = 'block';
+
+        try {
+            // 2. 설정 저장 (Netlify API에 요청)
+            const response = await fetch(SETUP_API_ENDPOINT, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    notionToken, 
+                    notionDbId,
+                    theme 
+                })
+            });
+
+            // HTTP 오류 응답 처리
+            if (!response.ok) {
+                // API 호출 실패 시 에러 메시지 처리 (Netlify 환경 변수 문제일 가능성이 높음)
+                let errorMessage = `API 호출 실패: ${response.status}`;
+                try {
+                    const errorData = await response.json();
+                    errorMessage = `${response.status} - ${errorData.error || '알 수 없는 오류'}`;
+                } catch (e) {
+                    // JSON 파싱 실패 시 일반 메시지 사용
+                    errorMessage = `${response.status} - 서버 응답 오류. (Netlify 환경 변수 확인 필요)`;
+                }
+                throw new Error(errorMessage);
+            }
+
+            const data = await response.json();
+            const userId = data.userId; // Firestore 저장이 성공하면 반환된 고유 ID
+
+            // 3. 위젯 URL 생성 (노션 Embed는 Netlify API 엔드포인트를 사용)
+            const widgetUrl = `${WIDGET_API_ENDPOINT_BASE}?userId=${userId}`;
+
+            // 4. 결과 출력
+            resultDiv.innerHTML = `
+                <p class="success-message">✅ 설정이 저장되었고 위젯 URL이 생성되었습니다!</p>
+                <h3>위젯 임베드 URL:</h3>
+                <textarea readonly>${widgetUrl}</textarea>
+                <p style="font-size: 0.85em; color: #666; margin-top: 10px;">
+                    * 위의 URL을 복사하여 **노션 페이지의 /embed 블록**에 붙여넣으세요.
+                </p>
+                <p>당신의 고유 ID: <strong>${userId}</strong></p>
+            `;
+            
+        } catch (error) {
+            resultDiv.innerHTML = `<p class="error-message">오류 발생: ${error.message}</p>`;
+        } 
+        
+        finally {
+            loadingSpinner.style.display = 'none'; // 로딩 스피너 숨기기
+        }
+    }
     </script>
 </body>
 </html>

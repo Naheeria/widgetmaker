@@ -1,0 +1,14 @@
+{
+  "name": "notion-widget-builder",
+  "version": "1.0.0",
+  "description": "Vercel Serverless Function for Notion Widget Settings",
+  "main": "api/save-settings.js",
+  "scripts": {
+    "start": "vercel dev"
+  },
+  "dependencies": {
+    "@google-cloud/firestore": "^7.0.0",
+    "uuid": "^9.0.1",
+    "@notionhq/client": "^2.2.14"
+  }
+}

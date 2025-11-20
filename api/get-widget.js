@@ -186,8 +186,10 @@ const getWidgetTemplate = (userId, theme = 'blue') => {
 };
 
 module.exports = async (req, res) => {
-    // 🔑 1. 임베드 거부 문제 해결: X-Frame-Options 헤더를 제거합니다.
+    // 🔑 1. 임베드 거부 문제 해결: X-Frame-Options 헤더를 제거하고, 명시적으로 ALLOWALL을 추가합니다.
     res.setHeader('Content-Security-Policy', "frame-ancestors *");
+    // 🚨 이 부분이 노션 임베드 문제를 해결할 가장 중요한 코드입니다.
+    res.setHeader('X-Frame-Options', 'ALLOWALL'); 
     res.removeHeader('X-Frame-Options'); 
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
 
@@ -203,7 +205,7 @@ module.exports = async (req, res) => {
         const doc = await db.collection(SETTINGS_COLLECTION).doc(userId).get();
         
         if (!doc.exists) {
-             return res.status(404).send("<html><body><p>오류: 해당 사용자 ID에 대한 설정이 Firestore에 존재하지 않습니다.</p></body></html>");
+              return res.status(404).send("<html><body><p>오류: 해당 사용자 ID에 대한 설정이 Firestore에 존재하지 않습니다.</p></body></html>");
         }
         
         const settings = doc.data();

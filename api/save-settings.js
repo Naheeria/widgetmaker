@@ -9,7 +9,8 @@ const SETTINGS_COLLECTION = "userSettings";
 const ALLOWED_ORIGINS = [
     "https://widgetmaker.vercel.app", // 메인 프로덕션 도메인
     "http://localhost:3000",  // 💡 쉼표(,) 추가 및 로컬 개발 환경
-    "https://naheeria.github.io/widgetmaker" // 💡 GitHub Pages 도메인 추가
+    "https://naheeria.github.io/widgetmaker",
+    "https://naheeria.github.io"// 💡 GitHub Pages 도메인 추가
 ];
 
 // ===== CORS 공통 함수 (Vercel 임시 도메인 자동 허용 로직 강화) =====

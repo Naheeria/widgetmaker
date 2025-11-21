@@ -1,15 +1,38 @@
-export default async function handler(req, res) {
-  // CORS 설정
-  const origin = req.headers.origin || "";
-  const allowedOrigin = "https://widgetmaker.vercel.app"; // 메인 도메인만 허용 (핵심!)
+// api/get-widget.js
 
-  res.setHeader("Access-Control-Allow-Origin", allowedOrigin);
-  res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+// ===== 허용할 Origin 목록 =====
+const ALLOWED_ORIGINS = [
+  "https://widgetmaker.vercel.app", 
+  "https://widgetmaker-j4x161wb7-naheerias-projects.vercel.app",
+  "http://localhost:3000"
+];
+
+// ===== CORS Set 함수 =====
+function setCorsHeaders(req, res) {
+  const origin = req.headers.origin;
+
+  if (ALLOWED_ORIGINS.includes(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+  }
+
   res.setHeader("Vary", "Origin");
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+}
 
+export default async function handler(req, res) {
+  // CORS 적용
+  setCorsHeaders(req, res);
+
+  // OPTIONS 프리플라이트 처리
   if (req.method === "OPTIONS") {
     return res.status(200).end();
+  }
+
+  // GET 요청만 허용
+  if (req.method !== "GET") {
+    return res.status(405).send("Method Not Allowed");
   }
 
   // 사용자 ID
@@ -18,7 +41,7 @@ export default async function handler(req, res) {
     return res.status(400).send("Missing userId");
   }
 
-  // API 호출용 BASE URL — 반드시 고정 도메인 사용!!
+  // API BASE URL — 반드시 메인 도메인 사용
   const BASE_URL = "https://widgetmaker.vercel.app";
 
   // 위젯 HTML
@@ -77,7 +100,7 @@ export default async function handler(req, res) {
 </body>
 </html>`;
 
-  // 위젯 HTML 응답
+  // HTML 전달
   res.setHeader("Content-Type", "text/html; charset=utf-8");
   return res.send(widgetHtml);
 }

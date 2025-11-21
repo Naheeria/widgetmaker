@@ -1,7 +1,6 @@
 // api/get-widget.js
 
 // ===== Vercel 임시 도메인을 포함하여 모든 관련 Origin을 허용하는 로직으로 수정 =====
-// Vercel의 임시 도메인이 계속 바뀌어도 대응할 수 있도록 합니다.
 const ALLOWED_ORIGINS = [
     "https://widgetmaker.vercel.app", 
     "http://localhost:3000"
@@ -57,13 +56,14 @@ export default async function handler(req, res) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Quote Widget</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
-    
     <style>
+        /* 💡 최종 해결책: 폰트 로드를 @import 구문으로 인라인 강제 삽입 */
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
+        
         body {
             margin: 0;
             padding: 0;
-            /* 💡 Noto Sans KR 폰트 적용 (index.html CSS에서 가져옴) */
+            /* 💡 Noto Sans KR 폰트 적용 */
             font-family: "Noto Sans KR", sans-serif;
             background: transparent;
             overflow: hidden;
@@ -79,9 +79,7 @@ export default async function handler(req, res) {
             color: #333;
             box-sizing: border-box;
             width: 100%;
-            /* 폰트 설정이 body에서 상속되도록 설정 */
         }
-        /* [테마] 나중에 테마 선택 시 여기에 동적 CSS가 추가될 수 있습니다. */
     </style>
 </head>
 
@@ -89,14 +87,11 @@ export default async function handler(req, res) {
     <div id="quote-box">불러오는 중...</div>
 
     <script>
-        // 사용자 ID를 전역 변수로 설정
         const USER_ID = "${userId}";
-        // API 엔드포인트 설정
         const QUOTE_API_ENDPOINT = "${BASE_URL}/api/get-quote?userId=" + USER_ID;
 
         async function fetchRandomQuote() {
             try {
-                // Fetch 요청에 CORS 문제를 유발하는 'credentials' 옵션을 사용하지 않습니다.
                 const res = await fetch(QUOTE_API_ENDPOINT);
                 
                 if (!res.ok) {
@@ -112,7 +107,6 @@ export default async function handler(req, res) {
                 }
 
                 // 데이터 표시 (인용구, 저자, 도서명 포함)
-                // 줄바꿈을 위해 <br> 태그를 사용했습니다.
                 document.getElementById("quote-box").innerHTML = 
                     \`"\${data.quote}"<br><br>– \${data.author} (\${data.book})\`;
                     
@@ -129,7 +123,6 @@ export default async function handler(req, res) {
 
     // HTML 전달
     res.setHeader("Content-Type", "text/html; charset=utf-8");
-    // 노션 임베드가 원활하도록 X-Frame-Options 헤더를 제거하거나 설정하지 않습니다.
 
     return res.send(widgetHtml);
 }

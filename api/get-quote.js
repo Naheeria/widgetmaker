@@ -16,7 +16,8 @@ function applyCors(req, res) {
         /^https:\/\/widgetmaker-[a-z0-9]+-naheerias-projects\.vercel\.app$/,
         "http://localhost:3000",
         // 💡 GitHub Pages 도메인 추가 (구문 오류 수정 완료)
-        "https://naheeria.github.io/widgetmaker"
+        "https://naheeria.github.io/widgetmaker",
+        "https://naheeria.github.io"
     ];
 
     const isAllowed = allowed.some((o) =>

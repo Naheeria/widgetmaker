@@ -39,6 +39,7 @@ function initializeFirestore() {
         throw e;
     }
 }
+
 // ===== CORS Set 함수 =====
 function setCorsHeaders(req, res) {
     const origin = req.headers.origin;
@@ -53,11 +54,13 @@ function setCorsHeaders(req, res) {
     res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 }
 
-// ===== 테마 색상 정의 =====
+// ===== 테마 색상 정의 (보라색 추가됨) =====
 const THEME_COLORS = {
     blue: { background: '#f0f4ff', border: '#a8c7ff', color: '#1a54a0' },
     green: { background: '#f0fff0', border: '#b0ffb0', color: '#38761d' },
     pink: { background: '#fff0f4', border: '#ffb0c7', color: '#993366' },
+    // 💡 새로 추가된 보라색 테마
+    purple: { background: '#f8f4ff', border: '#c6b5ff', color: '#5b3e94' }, 
     default: { background: 'white', border: '#ddd', color: '#333' }
 };
 
@@ -72,8 +75,7 @@ export default async function handler(req, res) {
 
     const BASE_URL = "https://widgetmaker.vercel.app";
     let themeColor = THEME_COLORS.default;
-    let notionToken, notionDbId; // 쿼리 API 호출을 위해 토큰/DB ID도 필요함
-
+    
     // 1. Firestore에서 설정 (테마 포함) 불러오기
     try {
         initializeFirestore();
@@ -81,15 +83,11 @@ export default async function handler(req, res) {
 
         if (doc.exists) {
             const data = doc.data();
-            const userTheme = data.theme || 'default';
+            // Firestore에 저장된 테마 값 사용
+            const userTheme = data.theme || 'default'; 
             themeColor = THEME_COLORS[userTheme] || THEME_COLORS.default;
-            notionToken = data.notionToken;
-            notionDbId = data.notionDbId;
-        } else {
-             // 설정이 없으면 기본값 사용, 에러는 아님 (나중에 get-quote에서 처리)
-        }
+        } 
     } catch (e) {
-        // Firestore 오류 발생 시 기본 테마 사용
         console.error("Firestore Load Error:", e);
     }
 
@@ -103,10 +101,13 @@ export default async function handler(req, res) {
     <title>Quote Widget</title>
     
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
+        
         body {
             margin: 0;
             padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            /* 노션 환경에서 실패 시 기본 폰트 fallback 사용 */
+            font-family: "Noto Sans KR", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
             background: transparent;
             overflow: hidden;
             line-height: 1.5;
@@ -115,24 +116,41 @@ export default async function handler(req, res) {
         #quote-box {
             padding: 16px;
             border-radius: 8px;
-            /* 💡 동적으로 불러온 색상 적용 */
+            /* 💡 동적으로 불러온 보라색 테마 적용 */
             background: ${themeColor.background}; 
             border: 1px solid ${themeColor.border};
-            color: ${themeColor.color}; /* 폰트 색상도 테마에 맞춤 */
+            color: ${themeColor.color};
             font-size: 16px; 
             box-sizing: border-box;
             width: 100%;
             text-align: center;
             box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-            font-weight: 500; /* 폰트 두께를 약간 굵게 */
+            font-weight: 500; 
+        }
+        
+        /* 로딩 스피너 (옵션) */
+        .spinner {
+             border: 3px solid rgba(0, 0, 0, 0.1);
+             border-top: 3px solid ${themeColor.color};
+             border-radius: 50%;
+             width: 14px;
+             height: 14px;
+             animation: spin 1s linear infinite;
+             display: inline-block;
+             vertical-align: middle;
+             margin-right: 5px;
+        }
+        @keyframes spin {
+             0% { transform: rotate(0deg); }
+             100% { transform: rotate(360deg); }
         }
     </style>
 </head>
 
 <body>
     <div id="quote-box">
-        <div class="spinner"></div>
-        <p style="margin: 0;">문구를 불러오는 중...</p>
+        <span class="spinner"></span>
+        <span style="vertical-align: middle;">문구를 불러오는 중...</span>
     </div>
 
     <script>

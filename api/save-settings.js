@@ -3,16 +3,32 @@
 const { v4: uuidv4 } = require("uuid");
 const { Firestore } = require("@google-cloud/firestore");
 
-// Firestore 컬렉션명
 const SETTINGS_COLLECTION = "userSettings";
 
-// 위젯·프론트와 통일된 CORS 허용 도메인
-const ALLOWED_ORIGIN = "https://widgetmaker.vercel.app";
+// ===== 허용 Origin 목록 =====
+const ALLOWED_ORIGINS = [
+  "https://widgetmaker.vercel.app",
+  "https://widgetmaker-5q5i0xlll-naheerias-projects.vercel.app",
+  "http://localhost:3000"
+];
 
-// Firestore 인스턴스(전역 1회 초기화)
+// ===== CORS 공통 함수 =====
+function setCorsHeaders(req, res) {
+  const origin = req.headers.origin;
+
+  if (ALLOWED_ORIGINS.includes(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+  }
+
+  res.setHeader("Vary", "Origin");
+  res.setHeader("Access-Control-Allow-Methods", "POST,OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  res.setHeader("Access-Control-Max-Age", "86400");
+}
+
+// ===== Firestore 인스턴스 =====
 let db;
 
-// Firestore 초기화
 function initializeFirestore() {
   if (db) return db;
 
@@ -43,73 +59,62 @@ function initializeFirestore() {
 
     return db;
   } catch (e) {
-    console.error("❌ Firestore Initialization Failed:", e.message);
+    console.error("❌ Firestore Init Failed:", e.message);
     throw e;
   }
 }
 
-// CORS 설정
-function setCors(res) {
-  res.setHeader("Access-Control-Allow-Origin", ALLOWED_ORIGIN);
-  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-  res.setHeader("Access-Control-Max-Age", "86400");
-  res.setHeader("Vary", "Origin");
-}
-
-// 서버리스 핸들러
 module.exports = async (req, res) => {
-  // 1) CORS
-  setCors(res);
+  // ===== CORS 적용 =====
+  setCorsHeaders(req, res);
 
   if (req.method === "OPTIONS") {
     return res.status(200).end();
   }
 
   if (req.method !== "POST") {
-    return res
-      .status(405)
-      .json({ error: "Method Not Allowed. Only POST is allowed." });
+    return res.status(405).json({
+      error: "Method Not Allowed. Only POST allowed.",
+    });
   }
 
-  // 2) Firestore 초기화
+  // ===== Firestore 초기화 =====
   try {
     initializeFirestore();
   } catch (e) {
     return res.status(500).json({
-      error: `Server configuration error: ${e.message}`,
+      error: `Server Firestore Config Error: ${e.message}`,
     });
   }
 
-  // 3) 요청 body 파싱
+  // ===== Body 파싱 =====
   let notionToken, notionDbId, theme;
 
   try {
     let body = req.body;
 
-    // 일부 환경에서 req.body가 비어 있을 수 있어 직접 파싱
     if (!body || Object.keys(body).length === 0) {
       const buffers = [];
       for await (const chunk of req) buffers.push(chunk);
-      const rawJson = Buffer.concat(buffers).toString("utf8");
-      body = rawJson ? JSON.parse(rawJson) : {};
+      const raw = Buffer.concat(buffers).toString("utf8");
+      body = raw ? JSON.parse(raw) : {};
     }
 
     notionToken = body.notionToken;
     notionDbId = body.notionDbId;
-    theme = body.theme || "blue"; // 기본 theme
+    theme = body.theme || "blue";
   } catch (e) {
     return res.status(400).json({ error: "Invalid JSON format" });
   }
 
-  // 4) 필수 값 확인
+  // ===== 필수 값 검사 =====
   if (!notionToken || !notionDbId) {
     return res.status(400).json({
       error: "Missing notionToken or notionDbId",
     });
   }
 
-  // 5) Firestore에 저장
+  // ===== Firestore 저장 =====
   try {
     const userId = uuidv4();
 

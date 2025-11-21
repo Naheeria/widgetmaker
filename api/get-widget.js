@@ -5,8 +5,9 @@ const { Firestore } = require("@google-cloud/firestore"); // Firestore 모듈 �
 // ===== Vercel 임시 도메인을 포함하여 모든 관련 Origin을 허용하는 로직으로 수정 =====
 const ALLOWED_ORIGINS = [
     "https://widgetmaker.vercel.app", 
-    "http://localhost:3000"
-     "https://naheeria.github.io/widgetmaker"
+    "http://localhost:3000",
+     "https://naheeria.github.io/widgetmaker",
+    "https://naheeria.github.io"
 ];
 
 // Firestore 및 Settings 컬렉션 정의

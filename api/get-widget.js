@@ -61,7 +61,6 @@ const THEME_COLORS = {
     green: { background: '#f0fff0', border: '#b0ffb0', color: '#38761d' },
     pink: { background: '#fff0f4', border: '#ffb0c7', color: '#993366' },
     default: { background: 'white', border: '#ddd', color: '#333' },
-    purple: { background: '#faf5ff', border: '#d4bbf9', color: '#57088b' } 
 };
 
 export default async function handler(req, res) {

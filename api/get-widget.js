@@ -6,6 +6,7 @@ const { Firestore } = require("@google-cloud/firestore"); // Firestore 모듈 �
 const ALLOWED_ORIGINS = [
     "https://widgetmaker.vercel.app", 
     "http://localhost:3000"
+     "https://naheeria.github.io/widgetmaker"
 ];
 
 // Firestore 및 Settings 컬렉션 정의

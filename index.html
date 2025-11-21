@@ -1,242 +1,176 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> 노션 글귀 위젯 생성기</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
-    
-    <style>
-        /* CSS 코드는 변경 없이 그대로 유지됩니다. */
-        body {
-            font-family: 'Noto Sans KR', sans-serif;
-            margin: 0;
-            padding: 40px 20px;
-            background-color: #f0f2f5;
-            color: #333;
-            line-height: 1.6;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            min-height: 100vh;
-            box-sizing: border-box;
-        }
-        .container {
-            background-color: #ffffff;
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-            max-width: 600px;
-            width: 100%;
-            text-align: center;
-            margin: auto;
-        }
-        h1 {
-            font-size: 2em;
-            color: #3f51b5;
-            margin-bottom: 30px;
-            font-weight: 700;
-        }
-        h3 {
-            font-size: 1.3em;
-            color: #555;
-            margin-top: 30px;
-            margin-bottom: 20px;
-            font-weight: 500;
-        }
-        label {
-            display: block;
-            text-align: left;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: #444;
-            font-size: 0.95em;
-        }
-        input[type="text"], select {
-            width: calc(100% - 24px);
-            padding: 12px;
-            margin-bottom: 20px;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 1em;
-            transition: border-color 0.3s ease;
-            outline: none;
-            box-sizing: border-box;
-        }
-        input[type="text"]:focus, select:focus {
-            border-color: #3f51b5;
-        }
-        /* 버튼 색상을 원래 작동 가능한 상태의 파란색으로 복원 */
-        button {
-            padding: 12px 25px;
-            background-color: #3f51b5; 
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1.1em;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-            margin-top: 10px;
-        }
-        button:hover {
-            background-color: #303f9f;
-            transform: translateY(-2px);
-        }
-        button:active {
-            transform: translateY(0);
-        }
-        #result {
-            margin-top: 40px;
-            padding: 25px;
-            background-color: #f8faff; /* 배경색을 원래 성공적인 상태로 복원 */
-            border: 1px solid #cfe2ff; /* 테두리색을 원래 성공적인 상태로 복원 */
-            border-radius: 10px;
-            text-align: left;
-            font-size: 0.9em;
-            color: #333;
-        }
-        textarea {
-            width: calc(100% - 24px);
-            height: 50px;
-            padding: 12px;
-            margin-top: 15px;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            font-family: monospace;
-            font-size: 0.9em;
-            background-color: #eef2f6; /* 배경색을 원래 성공적인 상태로 복원 */
-            resize: vertical;
-            outline: none;
-            white-space: pre;
-        }
-        .spinner {
-            border: 4px solid rgba(0, 0, 0, 0.1);
-            border-top: 4px solid #3f51b5;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            animation: spin 1s linear infinite;
-            margin: 15px auto;
-            display: none;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        .error-message { color: #d32f2f; font-weight: 500; margin-top: 10px; }
-        .success-message { color: #4CAF50; font-weight: 500; margin-top: 10px; }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> 노션 글귀 위젯 생성기</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* 이전 CSS는 그대로 유지하지만, 인라인 스타일이 우선 적용됩니다. */
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            margin: 0;
+            padding: 40px 20px;
+            background-color: #f0f2f5;
+            color: #333;
+            line-height: 1.6;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+        /* ... 나머지 원래의 <style> 코드 ... */
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-top: 4px solid #3f51b5;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            margin: 15px auto;
+            display: none;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .error-message { color: #d32f2f; font-weight: 500; margin-top: 10px; }
+        .success-message { color: #4CAF50; font-weight: 500; margin-top: 10px; }
+    </style>
 </head>
 
 <body>
-    <div class="container">
-        <h1> 노션 글귀 위젯 생성기</h1>
-        <p>설정을 저장하고 테마를 선택하여 위젯 URL을 생성하세요.</p>
+    <div class="container" style="
+        font-family: 'Noto Sans KR', sans-serif;
+        margin: 40px auto; 
+        padding: 20px; 
+        max-width: 600px;
+        background-color: #ffffff;
+        border: 1px solid #ccc; 
+        text-align: center; 
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+    ">
+        <h1 style="color: #3f51b5; margin-bottom: 20px;">
+            ✨ 노션 글귀 위젯 생성기
+        </h1>
+        <p>설정을 저장하고 테마를 선택하여 위젯 URL을 생성하세요.</p>
 
-        <form id="setupForm" onsubmit="event.preventDefault(); saveSettings();"> 
-            <h3>⚙️ 1. 위젯 설정</h3>
-            
-            <label for="notionToken">노션 API 토큰:</label>
-            <input type="text" id="notionToken" required placeholder="예: ntn..."> 
-            <label for="notionDbId">노션 데이터베이스 ID:</label>
-            <input type="text" id="notionDbId" required placeholder="예: c892b1a2d3f44e567890abcdef">
+        <form id="setupForm" onsubmit="event.preventDefault(); saveSettings();"> 
+            <h3 style="color: #555; margin-top: 30px; margin-bottom: 15px;">
+                ⚙️ 1. 위젯 설정
+            </h3>
+            
+            <label for="notionToken" style="display: block; text-align: left; margin-top: 10px;">노션 API 토큰:</label>
+            <input type="text" id="notionToken" required placeholder="예: ntn..." style="width: 90%; padding: 10px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;"> 
+            
+            <label for="notionDbId" style="display: block; text-align: left; margin-top: 10px;">노션 데이터베이스 ID:</label>
+            <input type="text" id="notionDbId" required placeholder="예: c892b1a2d3f44e567890abcdef" style="width: 90%; padding: 10px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
 
-            <label for="themeSelect">위젯 색상 테마:</label>
-            <select id="themeSelect">
-                <option value="blue">파랑 (기본)</option>
-                <option value="green">초록</option>
-                <option value="pink">분홍</option>
-            </select>
-            
-            <button type="submit">설정 저장 및 위젯 URL 생성</button>
-            <div class="spinner" id="loadingSpinner"></div>
-        </form>
-        
-        <div id="result">
-            <p>생성된 위젯 URL을 복사하여 노션 임베드 블록에 붙여넣으세요.</p>
-        </div>
-    </div>
+            <label for="themeSelect" style="display: block; text-align: left; margin-top: 10px;">위젯 색상 테마:</label>
+            <select id="themeSelect" style="width: 90%; padding: 10px; margin-bottom: 20px; border: 1px solid #ddd; border-radius: 4px;">
+                <option value="blue">파랑 (기본)</option>
+                <option value="green">초록</option>
+                <option value="pink">분홍</option>
+            </select>
+            
+            <button type="submit" style="
+                padding: 10px 20px; 
+                background-color: #3f51b5; 
+                color: white; 
+                border: none; 
+                border-radius: 5px; 
+                font-size: 1em; 
+                cursor: pointer;
+            ">설정 저장 및 위젯 URL 생성</button>
+            <div class="spinner" id="loadingSpinner"></div>
+        </form>
+        
+        <div id="result" style="margin-top: 30px; padding: 15px; border: 1px solid #cfe2ff; background-color: #f8faff; text-align: left;">
+            <p>생성된 위젯 URL을 복사하여 노션 임베드 블록에 붙여넣으세요.</p>
+        </div>
+    </div>
 
-    <script>
-        // 🚨 Vercel API 도메인 주소 설정
-        // ⚠️ 이 부분을 반드시 고객님의 실제 Vercel 배포 주소로 변경해야 합니다.
-        const VERCEL_BASE_URL = 'https://widgetmaker.vercel.app'; 
+    <script>
+        // 🚨 Vercel API 도메인 주소 설정
+        // ⚠️ 이 부분을 반드시 고객님의 실제 Vercel 배포 주소로 변경해야 합니다.
+        const VERCEL_BASE_URL = 'https://widgetmaker.vercel.app'; 
 
-        // Vercel 도메인을 사용하여 API 호출 경로를 설정합니다.
-        const SETUP_API_ENDPOINT = `${VERCEL_BASE_URL}/api/save-settings`; 
-        const WIDGET_API_ENDPOINT_BASE = `${VERCEL_BASE_URL}/api/get-widget`; 
+        // Vercel 도메인을 사용하여 API 호출 경로를 설정합니다.
+        const SETUP_API_ENDPOINT = `${VERCEL_BASE_URL}/api/save-settings`; 
+        const WIDGET_API_ENDPOINT_BASE = `${VERCEL_BASE_URL}/api/get-widget`; 
 
-        async function saveSettings() {
-        // 1. 입력 값 및 UI 요소 가져오기
-        const notionToken = document.getElementById('notionToken').value;
-        const notionDbId = document.getElementById('notionDbId').value;
-        const theme = document.getElementById('themeSelect').value;
-        
-        const resultDiv = document.getElementById('result');
-        const loadingSpinner = document.getElementById('loadingSpinner');
+        async function saveSettings() {
+        // 1. 입력 값 및 UI 요소 가져오기
+        const notionToken = document.getElementById('notionToken').value;
+        const notionDbId = document.getElementById('notionDbId').value;
+        const theme = document.getElementById('themeSelect').value;
+        
+        const resultDiv = document.getElementById('result');
+        const loadingSpinner = document.getElementById('loadingSpinner');
 
-        // 입력 필드 검증 (옵션)
-        if (!notionToken || !notionDbId) {
-            resultDiv.innerHTML = '<p class="error-message">토큰과 데이터베이스 ID를 모두 입력해주세요.</p>';
-            return;
-        }
+        // 입력 필드 검증 (옵션)
+        if (!notionToken || !notionDbId) {
+            resultDiv.innerHTML = '<p class="error-message">토큰과 데이터베이스 ID를 모두 입력해주세요.</p>';
+            return;
+        }
 
-        resultDiv.innerHTML = '<p class="success-message">설정을 저장하고 위젯을 생성하는 중입니다...</p>';
-        loadingSpinner.style.display = 'block';
+        resultDiv.innerHTML = '<p class="success-message">설정을 저장하고 위젯을 생성하는 중입니다...</p>';
+        loadingSpinner.style.display = 'block';
 
-        try {
-            // 2. 설정 저장 (Vercel API에 요청)
-            const response = await fetch(SETUP_API_ENDPOINT, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    notionToken, 
-                    notionDbId,
-                    theme 
-                })
-            });
+        try {
+            // 2. 설정 저장 (Vercel API에 요청)
+            const response = await fetch(SETUP_API_ENDPOINT, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    notionToken, 
+                    notionDbId,
+                    theme 
+                })
+            });
 
-            // HTTP 오류 응답 처리
-            if (!response.ok) {
-                // API 호출 실패 시 에러 메시지 처리 (Vercel 환경 변수 문제일 가능성이 높음)
-                let errorMessage = `API 호출 실패: ${response.status}`;
-                try {
-                    const errorData = await response.json();
-                    errorMessage = `${response.status} - ${errorData.error || '알 수 없는 오류'}`;
-                } catch (e) {
-                    // JSON 파싱 실패 시 일반 메시지 사용
-                    errorMessage = `${response.status} - 서버 응답 오류. (Vercel 환경 변수 확인 필요)`;
-                }
-                throw new Error(errorMessage);
-            }
+            // HTTP 오류 응답 처리
+            if (!response.ok) {
+                // API 호출 실패 시 에러 메시지 처리 (Vercel 환경 변수 문제일 가능성이 높음)
+                let errorMessage = `API 호출 실패: ${response.status}`;
+                try {
+                    const errorData = await response.json();
+                    errorMessage = `${response.status} - ${errorData.error || '알 수 없는 오류'}`;
+                } catch (e) {
+                    // JSON 파싱 실패 시 일반 메시지 사용
+                    errorMessage = `${response.status} - 서버 응답 오류. (Vercel 환경 변수 확인 필요)`;
+                }
+                throw new Error(errorMessage);
+            }
 
-            const data = await response.json();
-            const userId = data.userId; // Firestore 저장이 성공하면 반환된 고유 ID
+            const data = await response.json();
+            const userId = data.userId; // Firestore 저장이 성공하면 반환된 고유 ID
 
-            // 3. 위젯 URL 생성 (노션 Embed는 Vercel API 엔드포인트를 사용)
-            const widgetUrl = `${WIDGET_API_ENDPOINT_BASE}?userId=${userId}`;
+            // 3. 위젯 URL 생성 (노션 Embed는 Vercel API 엔드포인트를 사용)
+            const widgetUrl = `${WIDGET_API_ENDPOINT_BASE}?userId=${userId}`;
 
-            // 4. 결과 출력
-            resultDiv.innerHTML = `
-                <p class="success-message">✅ 설정이 저장되었고 위젯 URL이 생성되었습니다!</p>
-                <h3>위젯 임베드 URL:</h3>
-                <textarea readonly>${widgetUrl}</textarea>
-                <p style="font-size: 0.85em; color: #666; margin-top: 10px;">
-                    * 위의 URL을 복사하여 **노션 페이지의 /embed 블록**에 붙여넣으세요.
-                </p>
-                <p>당신의 고유 ID: <strong>${userId}</strong></p>
-            `;
-            
-        } catch (error) {
-            resultDiv.innerHTML = `<p class="error-message">오류 발생: ${error.message}</p>`;
-        } 
-        
-        finally {
-            loadingSpinner.style.display = 'none'; // 로딩 스피너 숨기기
-        }
-        }
-    </script>
+            // 4. 결과 출력
+            resultDiv.innerHTML = `
+                <p class="success-message">✅ 설정이 저장되었고 위젯 URL이 생성되었습니다!</p>
+                <h3>위젯 임베드 URL:</h3>
+                <textarea readonly>${widgetUrl}</textarea>
+                <p style="font-size: 0.85em; color: #666; margin-top: 10px;">
+                    * 위의 URL을 복사하여 **노션 페이지의 /embed 블록**에 붙여넣으세요.
+                </p>
+                <p>당신의 고유 ID: <strong>${userId}</strong></p>
+            `;
+            
+        } catch (error) {
+            resultDiv.innerHTML = `<p class="error-message">오류 발생: ${error.message}</p>`;
+        } 
+        
+        finally {
+            loadingSpinner.style.display = 'none'; // 로딩 스피너 숨기기
+        }
+        }
+    </script>
 </body>
 </html>

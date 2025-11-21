@@ -10,11 +10,9 @@ const ALLOWED_ORIGINS = [
 function setCorsHeaders(req, res) {
     const origin = req.headers.origin;
 
-    // Vercel의 임시 도메인(*-***.vercel.app)과 등록된 Origin을 모두 허용
     if (origin && (ALLOWED_ORIGINS.includes(origin) || origin.endsWith('.vercel.app'))) {
         res.setHeader("Access-Control-Allow-Origin", origin);
     } else {
-        // 안전하게 메인 도메인 허용
         res.setHeader("Access-Control-Allow-Origin", "https://widgetmaker.vercel.app");
     }
 
@@ -28,23 +26,19 @@ export default async function handler(req, res) {
     // CORS 적용
     setCorsHeaders(req, res);
 
-    // OPTIONS 프리플라이트 처리
     if (req.method === "OPTIONS") {
         return res.status(200).end();
     }
 
-    // GET 요청만 허용
     if (req.method !== "GET") {
         return res.status(405).send("Method Not Allowed");
     }
 
-    // 사용자 ID
     const userId = req.query.userId;
     if (!userId) {
         return res.status(400).send("Missing userId");
     }
 
-    // API BASE URL — 반드시 메인 도메인 사용
     const BASE_URL = "https://widgetmaker.vercel.app";
 
     // 위젯 HTML
@@ -57,28 +51,29 @@ export default async function handler(req, res) {
     <title>Quote Widget</title>
     
     <style>
-        /* 💡 최종 해결책: 폰트 로드를 @import 구문으로 인라인 강제 삽입 */
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
-        
+        /* 폰트 로드 링크/import 제거! 노션 임베드 환경에서 작동이 보장되는 폰트 사용 */
         body {
             margin: 0;
             padding: 0;
-            /* 💡 Noto Sans KR 폰트 적용 */
-            font-family: "Noto Sans KR", sans-serif;
+            /* 💡 노션 기본 폰트 (산세리프)로 지정하여 깨짐 현상 방지 */
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
             background: transparent;
             overflow: hidden;
+            line-height: 1.5; /* 가독성 향상 */
         }
 
         #quote-box {
             padding: 16px;
             border-radius: 8px;
-            /* 위젯이 노션 배경색 위에 잘 보이도록 반투명 흰색 배경 사용 */
-            background: #ffffffdd; 
+            /* 💡 배경색을 불투명한 흰색으로 변경하여 적용되도록 강제 */
+            background: white; 
             border: 1px solid #ddd;
-            font-size: 18px;
+            font-size: 16px; /* 노션 환경에 맞게 약간 축소 */
             color: #333;
             box-sizing: border-box;
             width: 100%;
+            text-align: center; /* 가운데 정렬로 시각적 안정감 부여 */
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08); /* 약간의 그림자 추가 */
         }
     </style>
 </head>
@@ -108,7 +103,7 @@ export default async function handler(req, res) {
 
                 // 데이터 표시 (인용구, 저자, 도서명 포함)
                 document.getElementById("quote-box").innerHTML = 
-                    \`"\${data.quote}"<br><br>– \${data.author} (\${data.book})\`;
+                    \`"\${data.quote}"<br><br>— \${data.author} (\${data.book})\`;
                     
             } catch (err) {
                 console.error("Fetch Error:", err);

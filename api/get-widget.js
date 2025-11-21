@@ -1,106 +1,154 @@
-// api/get-widget.js
+// api/get-quote.js
 
-// ===== 허용할 Origin 목록 =====
-const ALLOWED_ORIGINS = [
-  "https://widgetmaker.vercel.app", 
-  "https://widgetmaker-j4x161wb7-naheerias-projects.vercel.app",
-  "http://localhost:3000"
-];
+const { Firestore } = require("@google-cloud/firestore");
+const { Client } = require("@notionhq/client");
 
-// ===== CORS Set 함수 =====
-function setCorsHeaders(req, res) {
-  const origin = req.headers.origin;
+const PROJECT_ID = process.env.GOOGLE_CLOUD_PROJECT_ID;
+const SETTINGS_COLLECTION = "userSettings";
 
-  if (ALLOWED_ORIGINS.includes(origin)) {
+// 🔥 CORS: 프리뷰·본배포·로컬 전부 허용
+function applyCors(req, res) {
+  const origin = req.headers.origin || "";
+
+  const allowed = [
+    "https://widgetmaker.vercel.app",
+    /^https:\/\/widgetmaker-[a-z0-9]+-naheerias-projects\.vercel\.app$/,
+    "http://localhost:3000"
+  ];
+
+  const isAllowed = allowed.some((o) =>
+    o instanceof RegExp ? o.test(origin) : o === origin
+  );
+
+  if (isAllowed) {
     res.setHeader("Access-Control-Allow-Origin", origin);
   }
 
-  res.setHeader("Vary", "Origin");
-  res.setHeader("Access-Control-Allow-Credentials", "true");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  res.setHeader("Vary", "Origin");
 }
 
-export default async function handler(req, res) {
-  // CORS 적용
-  setCorsHeaders(req, res);
+// ---------------------- Firestore --------------------------
 
-  // OPTIONS 프리플라이트 처리
+let db;
+function initializeFirestore() {
+  if (db) return db;
+
+  try {
+    const { GCP_SERVICE_ACCOUNT_KEY } = process.env;
+
+    if (!PROJECT_ID || !GCP_SERVICE_ACCOUNT_KEY) {
+      throw new Error(
+        "환경 변수 누락: GOOGLE_CLOUD_PROJECT_ID 또는 GCP_SERVICE_ACCOUNT_KEY가 없습니다."
+      );
+    }
+
+    const keyJsonString = Buffer.from(
+      GCP_SERVICE_ACCOUNT_KEY,
+      "base64"
+    ).toString("utf8");
+    const credentials = JSON.parse(keyJsonString);
+
+    const privateKey = credentials.private_key.replace(/\\n/g, "\n");
+
+    db = new Firestore({
+      projectId: PROJECT_ID,
+      credentials: {
+        client_email: credentials.client_email,
+        private_key: privateKey
+      }
+    });
+
+    return db;
+  } catch (e) {
+    console.error("❌ Firestore 초기화 실패:", e.message);
+    throw new Error(`Firestore 초기화 실패: ${e.message}`);
+  }
+}
+
+// ------------------------ Handler --------------------------
+
+module.exports = async (req, res) => {
+  // 1) CORS
+  applyCors(req, res);
+
   if (req.method === "OPTIONS") {
     return res.status(200).end();
   }
 
-  // GET 요청만 허용
+  // 2) Only GET
   if (req.method !== "GET") {
-    return res.status(405).send("Method Not Allowed");
+    return res
+      .status(405)
+      .json({ quote: "Method Not Allowed (GET만 가능)", author: "Error" });
   }
 
-  // 사용자 ID
+  // 3) Validate userId
   const userId = req.query.userId;
   if (!userId) {
-    return res.status(400).send("Missing userId");
+    return res
+      .status(400)
+      .json({ quote: "User ID가 필요합니다.", author: "Error" });
   }
 
-  // API BASE URL — 반드시 메인 도메인 사용
-  const BASE_URL = "https://widgetmaker.vercel.app";
+  try {
+    // 4) Firestore
+    initializeFirestore();
 
-  // 위젯 HTML
-  const widgetHtml = `
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Quote Widget</title>
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: "Segoe UI", sans-serif;
-      background: transparent;
-      overflow: hidden;
+    const userDoc = await db.collection(SETTINGS_COLLECTION).doc(userId).get();
+    if (!userDoc.exists) {
+      return res.status(404).json({
+        quote: "사용자 설정을 찾을 수 없습니다.",
+        author: "Error"
+      });
     }
 
-    #quote-box {
-      padding: 16px;
-      border-radius: 8px;
-      background: #ffffffdd;
-      border: 1px solid #ddd;
-      font-size: 18px;
-      color: #333;
-      box-sizing: border-box;
-      width: 100%;
-    }
-  </style>
-</head>
+    const { notionToken, notionDbId } = userDoc.data();
 
-<body>
-  <div id="quote-box">불러오는 중...</div>
+    // 5) Notion Query
+    const notion = new Client({ auth: notionToken });
 
-  <script>
-    async function fetchRandomQuote() {
-      try {
-        const res = await fetch("${BASE_URL}/api/get-quote?userId=${userId}");
-        const data = await res.json();
+    const response = await notion.databases.query({
+      database_id: notionDbId
+    });
 
-        if (data.error) {
-          document.getElementById("quote-box").innerText = "문구를 불러올 수 없습니다.";
-          return;
-        }
+    const pages = response.results;
 
-        document.getElementById("quote-box").innerText = data.quote;
-      } catch (err) {
-        console.error("Fetch Error:", err);
-        document.getElementById("quote-box").innerText = "불러오기 실패";
-      }
+    if (pages.length === 0) {
+      return res.status(404).json({
+        quote: "데이터베이스에 글귀가 없습니다.",
+        author: "Notion"
+      });
     }
 
-    fetchRandomQuote();
-  </script>
-</body>
-</html>`;
+    // 6) Pick random
+    const randomPage = pages[Math.floor(Math.random() * pages.length)];
 
-  // HTML 전달
-  res.setHeader("Content-Type", "text/html; charset=utf-8");
-  return res.send(widgetHtml);
-}
+    const quote =
+      randomPage.properties["인용구"]?.title?.[0]?.plain_text ||
+      "글귀를 찾을 수 없음 (속성: 인용구)";
+
+    const author =
+      randomPage.properties["저자명"]?.select?.name ||
+      "저자 미상 (속성: 저자명)";
+
+    const book =
+      randomPage.properties["도서명"]?.rich_text?.[0]?.plain_text ||
+      "도서 미상 (속성: 도서명)";
+
+    return res.status(200).json({ quote, author, book });
+  } catch (error) {
+    console.error("💥 Error fetching quote:", error);
+
+    let errorMessage = error.message;
+    if (error.code === "object_not_found") {
+      errorMessage = "노션 DB ID가 잘못되었거나 권한이 없습니다.";
+    }
+
+    return res.status(500).json({
+      quote: `🚨 API 통신 실패: ${errorMessage}`,
+      author: "System Error"
+    });
+  }
+};

@@ -5,11 +5,11 @@ const { Firestore } = require("@google-cloud/firestore");
 
 const SETTINGS_COLLECTION = "userSettings";
 
-// ===== 허용 Origin 목록 (안정적인 메인/로컬 도메인만 등록) =====
+// ===== 허용 Origin 목록 (안정적인 메인/로컬 도메인 및 GitHub Pages 등록) =====
 const ALLOWED_ORIGINS = [
     "https://widgetmaker.vercel.app", // 메인 프로덕션 도메인
-    "http://localhost:3000"  // 로컬 개발 환경
- "https://naheeria.github.io/widgetmaker"
+    "http://localhost:3000",  // 💡 쉼표(,) 추가 및 로컬 개발 환경
+    "https://naheeria.github.io/widgetmaker" // 💡 GitHub Pages 도메인 추가
 ];
 
 // ===== CORS 공통 함수 (Vercel 임시 도메인 자동 허용 로직 강화) =====

@@ -14,6 +14,7 @@ function applyCors(req, res) {
     "https://widgetmaker.vercel.app",
     /^https:\/\/widgetmaker-[a-z0-9]+-naheerias-projects\.vercel\.app$/,
     "http://localhost:3000"
+     "https://naheeria.github.io/widgetmaker"
   ];
 
   const isAllowed = allowed.some((o) =>

@@ -8,7 +8,8 @@ const SETTINGS_COLLECTION = "userSettings";
 // ===== 허용 Origin 목록 (안정적인 메인/로컬 도메인만 등록) =====
 const ALLOWED_ORIGINS = [
     "https://widgetmaker.vercel.app", // 메인 프로덕션 도메인
-    "http://localhost:3000"           // 로컬 개발 환경
+    "http://localhost:3000"  // 로컬 개발 환경
+ "https://naheeria.github.io/widgetmaker"
 ];
 
 // ===== CORS 공통 함수 (Vercel 임시 도메인 자동 허용 로직 강화) =====

@@ -60,8 +60,6 @@ const THEME_COLORS = {
     blue: { background: '#f0f4ff', border: '#a8c7ff', color: '#1a54a0' },
     green: { background: '#f0fff0', border: '#b0ffb0', color: '#38761d' },
     pink: { background: '#fff0f4', border: '#ffb0c7', color: '#993366' },
-    default: { background: 'white', border: '#ddd', color: '#333' },
-    // 💡 새로운 'purple' 테마 추가
     purple: { background: '#faf5ff', border: '#d4bbf9', color: '#57088b' } 
 };
 
